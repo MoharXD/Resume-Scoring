@@ -36,7 +36,7 @@ st.markdown("""
 # --- ENTERPRISE MONGODB SECURITY GATEWAY ---
 @st.cache_resource
 def get_mongo_client():
-    client = pymongo.MongoClient("mongodb://localhost:27017/")
+    client = pymongo.MongoClient("mongodb+srv://devkanti:devkantisarkar@hackathon.uubwq89.mongodb.net/?appName=hackathon")
     return client
 
 def hash_password(password):
@@ -182,7 +182,7 @@ blind_mode = st.sidebar.checkbox("🕶️ Enable Blind Hiring Mode")
 
 if st.sidebar.button("🚨 Clear All Candidates", type="primary"):
     try:
-        res = requests.delete("http://127.0.0.1:8000/clear/")
+        res = requests.delete("https://sah-hackathon-resumescoring.onrender.com/clear/")
         if res.status_code == 200:
             st.session_state.processed_files = set() 
             st.session_state.uploader_key += 1 
@@ -190,7 +190,7 @@ if st.sidebar.button("🚨 Clear All Candidates", type="primary"):
         else:
             st.sidebar.error("Failed to clear database.")
     except Exception as e:
-        st.sidebar.error("Backend offline. Please start uvicorn!")
+        st.sidebar.error("Backend offline. Please check Render!")
 
 if 'processed_files' not in st.session_state:
     st.session_state.processed_files = set()
@@ -202,17 +202,17 @@ if uploaded_files:
                 files = {"file": (file.name, file.getvalue(), "application/pdf")}
                 data = {"jd_text": jd_text}
                 try:
-                    response = requests.post("http://127.0.0.1:8000/upload/", files=files, data=data)
+                    response = requests.post("https://sah-hackathon-resumescoring.onrender.com/upload/", files=files, data=data)
                     if response.status_code == 200:
                         st.session_state.processed_files.add(file.name)
                         st.toast(f"Successfully Indexed {file.name}!", icon="✅")
                     else:
                         st.error(f"Backend Error {response.status_code}: {response.text}")
                 except Exception as e:
-                    st.error(f"API Connection Error. Is Uvicorn running? Details: {e}")
+                    st.error(f"API Connection Error. Is Backend running? Details: {e}")
 
 try:
-    db_response = requests.get("http://127.0.0.1:8000/candidates/")
+    db_response = requests.get("https://sah-hackathon-resumescoring.onrender.com/candidates/")
     if db_response.status_code == 200 and len(db_response.json()) > 0:
         df = pd.DataFrame(db_response.json())
     else:
@@ -339,4 +339,4 @@ if not df.empty:
             except Exception as e:
                 st.warning("Could not run prediction. Train the model first.")
 else:
-    st.info("👋 Welcome! Please upload PDF resumes in the sidebar to begin processing. (Ensure Uvicorn is running!)")
+    st.info("👋 Welcome! Please upload PDF resumes in the sidebar to begin processing. (Ensure backend is running!)")
